@@ -1,23 +1,113 @@
-<h1>Product Details</h1>
+<pre>
+  <%= [Product.find(1), Product.find(2), Product.find(3), Product.find(4)] %>
+</pre>
+
+<pre>
+  <%= [Product.find(1), Product.find(2), Product.find(3), Product.find(4)].to_json %>
+</pre>
+
+<% pricing = []; a_names = [] %>
+<% [Product.find(1), Product.find(2), Product.find(3), Product.find(4)].each do |item| %>
+  <% pricing << item.price %>
+  <% a_names << item.name %>
+<% end %>
+<pre>
+  <%= pricing %>
+  <%= a_names %>
+</pre>
+<p>
+  <b>Price:</b>
+  <% [Product.find(1), Product.find(2), Product.find(3), Product.find(4)].each do |item| %>
+    <span id="<%= item.id %>"><%= number_to_currency item.price %></span>
+  <% end %>
+</p>
 
 <p>
   <b>Name:</b>
-  <%= @product.name %>
+  <% [Product.find(1), Product.find(2), Product.find(3), Product.find(4)].each do |item| %>
+    <span id="<%= item.id %>"><%= item.name %></span>
+  <% end %>
 </p>
 
-<p>
-  <b>Price:</b>
-  <%= number_to_currency @product.price %>
-</p>
+<div class="product-variant">
+      <% @a_dat.each do |property, values| %>
+        <p>
+          <b><%= property %>: </b>
+          <% values.each do |name, value| %>
+            <span id="">
+              <input type="radio" name="<%= property %>" value=""
+              id="<%= "#{property}-#{value.join('_')}"%>" class=""/>
+              <label for="<%= "#{property}-#{value.join('_')}" %>" class=""><%= name %></label>
+            </span>
+          <% end %>
+        </p>
+      <% end %>
+</div>
+<pre>
+  <%= @a_dat %>
+</pre>
 
-<% @product.properties.each do |name, value| %>
-  <p>
-    <b><%= name.humanize %>:</b>
-    <%= value %>
-  </p>
-<% end %>
+<script type="text/javascript">
+  function getItemId(str){
+    return str.split('-')[1].split('_');
+  }
+  function seletedItemIds(ex_id, ex_name){
+    item_ids = ex_id;
+    $('input:radio[name!='+ex_name+']:checked').each(function(index, value){
+      item_ids = _.intersection(item_ids, getItemId(value.id));
+    });
+    return item_ids;
+  }
 
-<p>
-  <%= link_to 'Edit', edit_product_path(@product) %> |
-  <%= link_to 'Back to Products', products_path %>
-</p>
+  function seletedLabelName(ex_name){
+    label_names = [];
+    $('input:radio[name!='+ex_name+']:checked').each(function(index, value){
+      label_names.push(value.name);
+    });
+    return label_names;
+  }
+
+  function removeSelected(ex_id, ex_name){
+    $('input:radio[name!='+ex_name+']:checked').each(function(index, value){
+      // seletedItemIds(ex_id, ex_name)
+      if(_.isEmpty(_.intersection(ex_id,getItemId(value.id)))){
+        value.checked = false;
+      }
+    });
+  }
+
+  function suggestValues(ex_id, ex_name){
+    $('input:radio[name!='+ex_name+']').each(function(index, value){
+      if(!value.checked){
+        value.labels[0].classList.remove('test-border');
+        if(!_.contains(seletedLabelName(ex_name), value.name) &&
+           !_.isEmpty(_.intersection(seletedItemIds(ex_id, ex_name), getItemId(value.id)))){
+          value.labels[0].classList.add('test-border');
+        }
+      }
+    });
+  }
+  var all_v_pro = <%== @a_dat.to_json %>;
+  $('input[type=radio]').click(function(){
+    // getSelectValues(this.name);
+    var selected_id = getItemId(this.id);
+    var selected_name = this.name;
+    var selected_names = [];
+    $('input:radio').each(function(index, value){
+      value.labels[0].classList.remove('test-border');
+      if(value.checked){
+        selected_names.push(value.name);
+      }
+    });
+
+    removeSelected(selected_id, selected_name);
+    suggestValues(selected_id, selected_name);
+
+    // $('input:radio[name!='+this.name+']:checked+label').toggleClass('test-border');
+    console.log("Kimly Lover");
+    // console.log(getItemId(this.id));
+  });
+  // $('.product-variant input:radio[name=Size]')
+  // !_.contains(selected_names, value.name) && 
+  // this.id.split('-')[1].split('_')
+</script>

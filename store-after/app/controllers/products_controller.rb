@@ -4,7 +4,16 @@ class ProductsController < ApplicationController
   end
 
   def show
-    @product = Product.find(params[:id])
+    # @product = Product.find(params[:id])
+    @a_dat = {}
+    Product.find(1).properties.keys.each do |key|
+      @a_dat[key] = {}
+      Product.all.each do |item|
+      @a_dat[key][item.properties[key]] = [] unless @a_dat[key].has_key?(item.properties[key])
+       @a_dat[key][item.properties[key]] << item.id
+    end
+    end
+    @a_dat
   end
 
   def new
@@ -16,6 +25,7 @@ class ProductsController < ApplicationController
   end
 
   def create
+    # binding.pry
     @product = Product.new(params[:product])
     if @product.save
       redirect_to @product, notice: 'Product was successfully created.'
